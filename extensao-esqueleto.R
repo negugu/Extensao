@@ -74,6 +74,14 @@ freq(dados_sinasc_2)
 # veja o dicionário do SINASC para identificar qual o código das categorias de cada variável
 
 
+
+dados_sinasc_2 = dados_sinasc_2 %>% mutate(across(-c(APGAR5,TPROBSON), ~na_if(.,9)) )%>%
+  mutate(across(TPROBSON, ~na_if(.,11)))%>%
+  mutate(across(everything(), ~na_if(.,99)))
+
+
+freq(dados_sinasc_2)
+
 # Tarefa 6. Atribuir legendas para as categorias das variáveis investigadas na etapa 4.
 # Exemplo: dados_sinasc_2$KOTELCHUCK = factor(dados_sinasc_2$KOTELCHUCK, levels = c(1,2,3,4,5), 
 # labels = c("Não realizou pré-natal", "Inadequado", "Intermediário", "Adequado",  

@@ -59,6 +59,15 @@ write.csv(dados_sinasc_2, file = "dados_sinasc_2.csv")
 # Tarefa 4. Verificar em dados_sinasc_2 a frequência das categorias das seguintes variáveis: LOCNASC, ESTCIVMAE, GESTACAO, GRAVIDEZ, PARTO,
 # SEXO, APGAR5, RACACOR, IDANOMAL, ESCMAE2010, RACACORMAE, TPAPRESENT, TPROBSON, PARIDADE, KOTELCHUCK
 
+dados_sinasc_2 %>% select(c(LOCNASC, ESTCIVMAE, GESTACAO, GRAVIDEZ, PARTO,
+                            SEXO, APGAR5, RACACOR, IDANOMAL, ESCMAE2010, RACACORMAE, TPAPRESENT, TPROBSON, PARIDADE, KOTELCHUCK)) %>% 
+  glimpse()
+
+
+summary(dados_sinasc_2)
+
+library(summarytools)
+freq(dados_sinasc_2)
 
 # Tarefa 5. Atribuir para cada variável de dados_sinasc_2 como sendo NA a categoria de "Não informado ou Ignorado", geralmente com código 9
 # KOTELCHUCK = 9 significa "não informado"   TPROBSON = 11 significa "não classificado por falta de informação"

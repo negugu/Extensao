@@ -156,6 +156,32 @@ dados_sinasc_2$LOCNASC = factor(dados_sinasc_2$LOCNASC, levels = c(1,2,3,4,5),
 # Atenção para casos de NA em IDADEMAE, PESO e APGAR5
 # Ao categorizar as variáveis, garantir que sejam transformadas em tipo fator
 
+dados_sinasc_2= dados_sinasc_2 %>% mutate(F_PESO = case_when(PESO<2500 ~ "Baixo peso",
+                                             PESO>=2500 & PESO<4000 ~ "Peso normal",
+                                             PESO>= 4000 ~ "Macrossomia"),
+                            F_IDADE = case_when(IDADEMAE<15 ~ "<15",
+                                                IDADEMAE>=15 & IDADEMAE<20  ~ "15-19",
+                                                IDADEMAE>=20 & IDADEMAE<25  ~ "20-24",
+                                                IDADEMAE>=25 & IDADEMAE<30  ~ "25-29",
+                                                IDADEMAE>=30 & IDADEMAE<35  ~ "30-34",
+                                                IDADEMAE>=35 & IDADEMAE<40  ~ "35-39",
+                                                IDADEMAE>=40 & IDADEMAE<45  ~ "40-44",
+                                                IDADEMAE>=45 & IDADEMAE<50  ~ "45-50",
+                                                IDADEMAE>=50  ~ "50+"),
+                            F_APGAR5 = case_when(APGAR5< 7 ~ "Baixo",
+                                                 APGAR5>=7 ~ "Normal")) %>% 
+  mutate(
+    F_PESO = factor(F_PESO, levels = c("Baixo peso", "Peso normal", "Macrossomia")),
+    
+    F_IDADE = factor(F_IDADE, levels = c("<15", "15-19", "20-24", "25-29", "30-34", 
+                                         "35-39", "40-44", "45-50", "50+")),
+    
+    F_APGAR5 = factor(F_APGAR5, levels = c("Baixo", "Normal")))
+
+
+
+
+
 
 # Tarefa 8. Agregar ao banco de dados_sinasc_2 as informações PESO_P10 e PESO_P90 a partir de Tabela_PIG_Brasil.csv
 # a Tabela PIG informa P10 e P90 dos pesos, de acordo com a idade gestacional

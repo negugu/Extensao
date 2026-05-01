@@ -51,7 +51,7 @@ dados_sinasc_2 = dados_sinasc_1 %>% filter(substr(CODMUNRES , start = 0,stop = 2
 
 # Exportar o arquivo com o nome dados_sinasc_2.csv
 write.csv(dados_sinasc_2, file = "dados_sinasc_2.csv")
-
+dados_sinasc_2= read.csv("dados_sinasc_2.csv")
 
 # Ao concluir a Tarefa 3 da Etapa 1 commite e envie para o repositório REMOTO o script e dados_sinasc_2.csv com o comentário "Dados do estado UF (coloque o nome da UF) e script de sua obtenção"
 
@@ -185,10 +185,161 @@ dados_sinasc_2$ESTCIV = factor(dados_sinasc_2$ESTCIV, levels = c("Sem companheir
 # criar nova variável referente ao deslocamento materno para realizar o parto, chamado de peregrinação
 # nova variável: dados_sinasc_2$PERIG: Não: CODMUNNASC igual a CODMUNRES, Sim: CODMUNNASC diferente de CODMUNRES
 
+tabela_pig = read.csv("Tabela_PIG_Brasil.csv", header = TRUE, sep=";")
+tabela_pig$SEXO = factor(tabela_pig$SEXO, levels = c("Masculino", "Feminino"))
+dados_sinasc_2 = merge(dados_sinasc_2, tabela_pig, by = c("SEMAGESTAC","SEXO"), all.x = TRUE)
+dados_sinasc_2$F_PIG=ifelse(dados_sinasc_2$GRAVIDEZ != "Única", NA,
+                            ifelse(is.na(dados_sinasc_2$PESO)|is.na(dados_sinasc_2$PESO_P10)|is.na(dados_sinasc_2$PESO_P90),
+                                   NA,
+                                   ifelse(dados_sinasc_2$PESO < dados_sinasc_2$PESO_P10, "PIG",
+                                          ifelse(dados_sinasc_2$PESO<=dados_sinasc_2$PESO_P90, "AIG", "GIG"))))
+dados_sinasc_2$F_PIG = factor(dados_sinasc_2$F_PIG, levels = c("PIG","AIG","GIG"))
+
+dados_sinasc_2 = dados_sinasc_2 %>% mutate(PERIG = ifelse(CODMUNNASC == CODMUNRES, "Não","Sim"))
+
+
+
+
+
+
+
+
+
+
 
 # Tarefa 9. Obter as frequências das categorias das variáveis e medidas descritivas de variáveis e salvar os resultados em novas variáveis.
 # Exemplo: freq_SEXO = table(dados_sinasc_2$SEXO)   media_peso = mean(dados_sinasc_2$PESO)
 # Medidas descritivas a serem calculadas para variáveis QUANTITATIVAS: P25, P50, P75, média e desvio-padrão. Atenção: usar na.rm = TRUE, quando necessário.
+
+# 1. Base inicial de municípios
+municipios = sort(unique(dados_sinasc_2$CODMUNRES))
+base = data.frame(CODMUNRES = municipios)
+
+# Garante que todas as categorias apareçam, mesmo com contagem zero
+gera_colunas = function(var_nome, levels_vetor, nomes_finais) {
+  tab = table(dados_sinasc_2$CODMUNRES, factor(dados_sinasc_2[[var_nome]], levels = levels_vetor))
+  df = as.data.frame.matrix(tab)
+  names(df) = nomes_finais
+  df$CODMUNRES = as.numeric(rownames(df))
+  return(df)
+}
+
+
+
+# TN (4)
+TN = as.data.frame(table(factor(dados_sinasc_2$CODMUNRES, levels = municipios)))
+names(TN) = c("CODMUNRES", "TN")
+base = merge(base, TN, by = "CODMUNRES", all.x = TRUE)
+
+# TNRC e TNRCR (5-6) - Ajustar critérios conforme sua base original
+base$TNRC = sapply(municipios, function(x) sum(complete.cases(dados_sinasc_2[dados_sinasc_2$CODMUNRES == x, ])))
+base$TNRCR = base$TNRC # Exemplo: se não houver filtro diferente para 22 variáveis
+
+# Idade Materna (7-16)
+base = merge(base, gera_colunas("F_IDADE", 
+                                c("<15","15-19","20-24","25-29","30-34","35-39","40-44","45-49","50+"),
+                                c("TGI_15","TGI_15_19","TGI_20_24","TGI_25_29","TGI_30_34","TGI_35_39","TGI_40_44","TGI_45_49","TGI_50")), by="CODMUNRES")
+base$TGIF = rowSums(base[, c("TGI_15_19","TGI_20_24","TGI_25_29","TGI_30_34","TGI_35_39","TGI_40_44","TGI_45_49")])
+
+# Escolaridade (22-27)
+base = merge(base, gera_colunas("ESCMAE2010", 
+                                c("Sem escolaridade", "Fundamental I (1ª a 4ª série)", "Fundamental II (5ª a 8ª série)", "Médio (9ª a 12ª série)", "Superior incompleto", "Superior completo"),
+                                c("EM_S","EM_FI","EM_FII","EM_M","EM_SI","EM_SC")), by="CODMUNRES")
+
+# Raça Mãe (28-32)
+base = merge(base, gera_colunas("RACACORMAE", c("Branca", "Preta", "Amarela", "Parda", "Indígena"),
+                                c("TGRC_B","TGRC_PT","TGRC_A","TGRC_PD","TGRC_I")), by="CODMUNRES")
+
+# Situação Conjugal (33-34)
+base = merge(base, gera_colunas("ESTCIV", c("Sem companheiro", "Com companheiro"),
+                                c("TGSC","TGCC")), by="CODMUNRES")
+
+# Paridade e Gravidez (35-38)
+base = merge(base, gera_colunas("PARIDADE", c("Nulípara", "Multípara"), c("TGPRI","TGNPRI")), by="CODMUNRES")
+base = merge(base, gera_colunas("GRAVIDEZ", c("Única", "Dupla", "Tripla e mais"), c("TGU","TGG1","TGG2")), by="CODMUNRES")
+base$TGG = base$TGG1 + base$TGG2
+
+# Duração Gestação (39-47)
+base = merge(base, gera_colunas("GESTACAO", 
+                                c("Menos de 22 semanas", "22 a 27 semanas", "28 a 31 semanas", "32 a 36 semanas", "37 a 41 semanas", "42 semanas e mais"),
+                                c("TGD_22","TGD_22_27","TGD_28_31","TGD_32_36","TGD_37_41","TGD_42")), by="CODMUNRES")
+base$TGD_PRT = base$TGD_22 + base$TGD_22_27 + base$TGD_28_31 + base$TGD_32_36
+base$TGD_AT  = base$TGD_37_41
+base$TGD_PST = base$TGD_42
+
+# Kotelchuck e Peregrinação (53-59)
+base = merge(base, gera_colunas("KOTELCHUCK", c("Não realizou", "Inadequado", "Intermediário", "Adequado", "Mais que adequado"),
+                                c("TKC_NR","TKC_ID","TKC_IT","TKC_AD","TKC_MAD")), by="CODMUNRES")
+base = merge(base, gera_colunas("PERIG", c("Sim", "Não"), c("TGPRG_S","TGPRG_N")), by="CODMUNRES")
+
+# Parto e Apresentação (60-64)
+base = merge(base, gera_colunas("PARTO", c("Vaginal", "Cesário"), c("TPV","TPC")), by="CODMUNRES")
+base = merge(base, gera_colunas("TPAPRESENT", c("Cefálico", "Pélvica ou podálica", "Transversa"), 
+                                c("TRAP_C","TRAP_P","TRAP_T")), by="CODMUNRES")
+
+# Robson (65-74) e Local (75-79)
+base = merge(base, gera_colunas("TPROBSON", paste0("Grupo ", 1:10), paste0("TGROB_", 1:10)), by="CODMUNRES")
+base = merge(base, gera_colunas("LOCNASC", c("Hospital", "Outros estabelecimentos de saúde", "Domicílio", "Outros", "Aldeia indígena"),
+                                c("TNLOC_H","TNLOC_ES","TNLOC_D","TNLOC_O","TNLOC_AI")), by="CODMUNRES")
+
+# Sexo e Raça RN (80-86)
+base = merge(base, gera_colunas("SEXO", c("Masculino", "Feminino"), c("TRS_M","TRS_F")), by="CODMUNRES")
+base = merge(base, gera_colunas("RACACOR", c("Branca", "Preta", "Amarela", "Parda", "Indígena"),
+                                c("TRRC_B","TRRC_PT","TRRC_A","TRRC_PD","TRRC_I")), by="CODMUNRES")
+
+# Peso e PIG (87-89, 95-97)
+base = merge(base, gera_colunas("F_PESO", c("Baixo peso", "Peso normal", "Macrossomia"), c("TRP_BP","TRP_N","TRP_M")), by="CODMUNRES")
+base = merge(base, gera_colunas("F_PIG", c("PIG", "AIG", "GIG"), c("TRPIG_P","TRPIG_A","TRPIG_G")), by="CODMUNRES")
+
+# Apgar e Anomalia (98-99, 102-103)
+base = merge(base, gera_colunas("F_APGAR5", c("Baixo", "Normal"), c("TRAPG5_B","TRAPG5_N")), by="CODMUNRES")
+base = merge(base, gera_colunas("IDANOMAL", c("Sim", "Não"), c("TRAC","TRSAC")), by="CODMUNRES")
+
+# --- 3. MEDIDAS DESCRITIVAS (ESTATÍSTICAS) ---
+calc_estat = function(var, prefixo) {
+  df = aggregate(dados_sinasc_2[[var]] ~ CODMUNRES, dados_sinasc_2, function(x) {
+    c(P25=quantile(x,0.25,na.rm=T), P50=quantile(x,0.5,na.rm=T), P75=quantile(x,0.75,na.rm=T), MD=mean(x,na.rm=T), DP=sd(x,na.rm=T))
+  })
+  res = data.frame(CODMUNRES=df[,1], df[,2])
+  names(res) = c("CODMUNRES", paste0(prefixo, c("_P25", "_P50", "_P75", "_MD", "_DP")))
+  return(res)
+}
+
+base = merge(base, calc_estat("IDADEMAE", "IM"), by="CODMUNRES", all.x=T)
+base = merge(base, calc_estat("SEMAGESTAC", "DG"), by="CODMUNRES", all.x=T)
+base = merge(base, calc_estat("PESO", "PESO"), by="CODMUNRES", all.x=T)
+base = merge(base, calc_estat("APGAR5", "APG5"), by="CODMUNRES", all.x=T)
+
+# --- 4. CRIAÇÃO DA LINHA UF (AGREGADO TOTAL) ---
+linha_uf = data.frame(matrix(NA, nrow=1, ncol=ncol(base)))
+names(linha_uf) = names(base)
+linha_uf$CODMUNRES = 22 # Piauí
+
+# Soma das colunas de contagem
+cols_soma = setdiff(names(base), c("CODMUNRES", grep("_P|_MD|_DP", names(base), value=T)))
+linha_uf[cols_soma] = colSums(base[cols_soma], na.rm=T)
+
+# Estatísticas para a UF
+calc_uf_est = function(var, prefixo) {
+  x = dados_sinasc_2[[var]]
+  linha_uf[[paste0(prefixo,"_P25")]] <<- quantile(x, 0.25, na.rm=T)
+  linha_uf[[paste0(prefixo,"_P50")]] <<- quantile(x, 0.5, na.rm=T)
+  linha_uf[[paste0(prefixo,"_P75")]] <<- quantile(x, 0.75, na.rm=T)
+  linha_uf[[paste0(prefixo,"_MD")]]  <<- mean(x, na.rm=T)
+  linha_uf[[paste0(prefixo,"_DP")]]  <<- sd(x, na.rm=T)
+}
+calc_uf_est("IDADEMAE", "IM"); calc_uf_est("SEMAGESTAC", "DG")
+calc_uf_est("PESO", "PESO"); calc_uf_est("APGAR5", "APG5")
+
+# --- 5. UNIÃO E ORGANIZAÇÃO FINAL (103 COLUNAS) ---
+final = rbind(linha_uf, base)
+final$ANO = 2015
+final$NIVEL = c("UF", rep("MUNICIPIO", nrow(base)))
+
+
+
+
+
 
 
 # Tarefa 10. Criar as colunas do novo banco de dados (de nome SINASC_UF.csv Exemplo: SINASC_RJ.csv) com base nas análises prévias, devendo as variáveis estar na ordem indicada abaixo
@@ -241,6 +392,38 @@ dados_sinasc_2$ESTCIV = factor(dados_sinasc_2$ESTCIV, levels = c("Sem companheir
 # 93: TRAPG5_N (total de recém-nascidos com Apgar5 normal, ou seja, >= 7)   94. APG5_MD (Apgar5 médio dos recém-nascidos)   
 # 95. APG5_DP (desvio-padrão dos Apgar5 dos recém-nascidos) 96. TRAC (total de recém-nascidos com anomalia congênita - IDANOMAL)
 # 97. TRSAC (total de recém-nascidos sem anomalia congênita)
+
+
+# Ordenação exata conforme a lista de 1 a 103
+ordem_103 = c(
+  "ANO", "NIVEL", "CODMUNRES", "TN", "TNRC", "TNRCR", # 1-6
+  "TGI_15", "TGI_15_19", "TGI_20_24", "TGI_25_29", "TGI_30_34", "TGI_35_39", "TGI_40_44", "TGI_45_49", "TGI_50", "TGIF", # 7-16
+  "IM_P25", "IM_P50", "IM_P75", "IM_MD", "IM_DP", # 17-21
+  "EM_S", "EM_FI", "EM_FII", "EM_M", "EM_SI", "EM_SC", # 22-27
+  "TGRC_B", "TGRC_PT", "TGRC_A", "TGRC_PD", "TGRC_I", # 28-32
+  "TGSC", "TGCC", "TGPRI", "TGNPRI", "TGU", "TGG", # 33-38
+  "TGD_22", "TGD_22_27", "TGD_28_31", "TGD_32_36", "TGD_37_41", "TGD_42", # 39-44
+  "TGD_PRT", "TGD_AT", "TGD_PST", # 45-47
+  "DG_P25", "DG_P50", "DG_P75", "DG_MD", "DG_DP", # 48-52
+  "TKC_NR", "TKC_ID", "TKC_IT", "TKC_AD", "TKC_MAD", # 53-57
+  "TGPRG_S", "TGPRG_N", "TPV", "TPC", # 58-61
+  "TRAP_C", "TRAP_P", "TRAP_T", # 62-64
+  paste0("TGROB_", 1:10), # 65-74
+  "TNLOC_H", "TNLOC_ES", "TNLOC_D", "TNLOC_O", "TNLOC_AI", # 75-79
+  "TRS_M", "TRS_F", # 80-81
+  "TRRC_B", "TRRC_PT", "TRRC_A", "TRRC_PD", "TRRC_I", # 82-86
+  "TRP_BP", "TRP_N", "TRP_M", # 87-89
+  "PESO_P25", "PESO_P50", "PESO_P75", "PESO_MD", "PESO_DP", # 90-94
+  "TRPIG_P", "TRPIG_A", "TRPIG_G", # 95-97
+  "TRAPG5_B", "TRAPG5_N", "APG5_MD", "APG5_DP", # 98-101
+  "TRAC", "TRSAC" # 102-103
+)
+
+SINASC_PI= final[, ordem_103]
+SINASC_PI[, 7:103] = round(SINASC_PI[, 7:103], 2) 
+write.csv(SINASC_FINAL, "SINASC_PI.csv", row.names = FALSE)
+
+
 
 
 # Tarefa 11: Exporte o banco de dados com o nome SINASC_UF.csv

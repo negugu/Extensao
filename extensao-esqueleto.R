@@ -421,13 +421,13 @@ ordem_103 = c(
 
 SINASC_PI= final[, ordem_103]
 SINASC_PI[, 7:103] = round(SINASC_PI[, 7:103], 2) 
-write.csv(SINASC_FINAL, "SINASC_PI.csv", row.names = FALSE)
+
 
 
 
 
 # Tarefa 11: Exporte o banco de dados com o nome SINASC_UF.csv
-
+write.csv(SINASC_FINAL, "SINASC_PI.csv", row.names = FALSE)
 
 
 # Ao terminar a ETAPA 1 commite e envie para o repositório REMOTO com o comentário "Dados da UF e Script Etapa 1"

@@ -499,11 +499,38 @@ write.csv(dados_sim_2, file = "dados_sim_2.csv")
 # Tarefa 4. Verificar em dados_sim_2 a frequência das categorias das seguintes variáveis: TIPOBITO, SEXO, RACACOR, 
 # TPMORTEOCO, OBITOGRAV, OBITOPUERP, CAUSABAS, TPOBITOCOR, MORTEPARTO
 
+dados_sim_2= read.csv("dados_sim_2.csv") %>% select(-1)
 
-# Tarefa 5. Atribuir para cada variável de dados_sim_2 como sendo NA a categoria de "Não informado ou Ignorado", geralmente com código 9
+table(dados_sim_2$TIPOBITO) 
+table(dados_sim_2$SEXO)
+table(dados_sim_2$RACACOR) 
+table(dados_sim_2$TPMORTEOCO)
+table(dados_sim_2$OBITOGRAV)
+table(dados_sim_2$OBITOPUERP)
+table(dados_sim_2$CAUSABAS)
+table(dados_sim_2$TPOBITOCOR)
+table(dados_sim_2$MORTEPARTO)
+
+
+
+
+
+
+# Tarefa 5. Atribuir para cada variável de dados_sim_2 como sendo NA a categoria de
+#"Não informado ou Ignorado", geralmente com código 9
 # veja o dicionário do SIM para identificar qual o código das categorias de cada variável
 # Em variáveis quantitativas como IDADE verificar se existem valores como 99 para NA
 
+dados_sim_2$SEXO[dados_sim_2$SEXO == 0] = NA
+dados_sim_2$TPMORTEOCO[dados_sim_2$TPMORTEOCO == 9] = NA
+dados_sim_2$OBITOGRAV [dados_sim_2$OBITOGRAV == 9] = NA
+dados_sim_2$OBITOPUERP [dados_sim_2$OBITOPUERP == 9] = NA
+dados_sim_2$MORTEPARTO [dados_sim_2$MORTEPARTO == 9] = NA
+dados_sim_2$IDADE [dados_sim_2$IDADE == 999] = NA
+dados_sim_2$ESC2010 [ dados_sim_2$ESC2010 == 9] = NA
+dados_sim_2$MORTEPARTO [dados_sim_2$MORTEPARTO == 9]= NA
+
+summary(dados_sim_2)
 
 # Tarefa 6. Atribuir legendas para as categorias das variáveis qualitativas investigadas na tarefa 4.
 # Exemplo: dados_sim_2$TIPOBITO = factor(dados_sim_2$TIPOBITO, levels = c(1,2), 
@@ -511,6 +538,66 @@ write.csv(dados_sim_2, file = "dados_sim_2.csv")
 
 # ATENçÃO: 1. Na hora de escrever os labels, somente a primeira letra da palavra é maiúscula. Exemplo para SEXO: Feminino e Masculino
 #          2. Nesta Tarefa 6 não crie novas variáveis no banco de dados
+
+
+summary(dados_sim_2)
+dados_sim_2$RACACOR = factor(dados_sim_2$RACACOR, levels = c(1,2,3,4,5), 
+                                labels = c("Branca", "Preta", "Amarela", "Parda", "Indígena"))
+dados_sim_2$ESC2010 = factor(dados_sim_2$ESC2010, levels = c(0,1,2,3,4,5), 
+                             labels = c("Sem escolaridade", "Fundamental I (1ª a 4ª série)", 
+                                        "Fundamental II (5ª a 8ª série)", "Médio (antigo 2º Grau)",
+                                        "Superior incompleto","Superior completo" ))
+
+
+dados_sim_2$TPMORTEOCO = factor(dados_sim_2$TPMORTEOCO, levels = c(1,2,3,4,5,8), 
+                             labels = c("Na gravidez", "No parto","No abortamento",
+                                        "Até 42 dias após o término do parto",
+                                        "De 43 dias a 1 ano após o término da gestação ",
+                                        "Não ocorreu nestes períodos" ))
+dados_sim_2$OBITOPUERP = factor(dados_sim_2$OBITOPUERP, levels = c(1,2,3), 
+                                labels = c("Sim, até 42 dias após o parto", "Sim, de 43 dias a 1 ano",
+                                           "Não"))
+
+dados_sim_2$TPOBITOCOR = factor(dados_sim_2$TPOBITOCOR, levels = c(1,2,3,4,5,6,7,8,9), 
+                             labels = c("Durante a gestação",
+                                        "Durante o abortamento",
+                                        "Após o abortamento", 
+                                        "No parto ou até 1 hora após o parto", 
+                                        "No puerpério - até 42 dias após o parto",
+                                        "Entre 43 dias e até 1 ano após o parto",
+                                        "A investigação não identificou o momento do óbito",
+                                        "Mais de um ano após o parto",
+                                        "O óbito não ocorreu nas circunstancias anteriores"))
+
+
+dados_sim_2$MORTEPARTO = factor(dados_sim_2$MORTEPARTO, levels = c(1,2,3), 
+                                labels = c("Antes", "Durante",
+                                           "Após"))
+
+
+
+
+dados_sim_2= dados_sim_2 %>% mutate(TIPOBITO = case_when(TIPOBITO == 2 ~ "Não fetal",
+                                                         TIPOBITO == 1 ~ "Fetal"),
+                                    SEXO = case_when(SEXO == 1 ~ "Masculino",
+                                                     SEXO == 2 ~ "Feminino"),
+                                    OBITOGRAV = case_when(OBITOGRAV == 1 ~ "Sim",
+                                                     SEXO == 2 ~ "Não")
+                                    
+                                    
+                                  )
+                                    
+
+summary(dados_sim_2)
+
+
+
+
+
+
+
+
+
 
 
 # Tarefa 7. Crie um banco de dados, de nome SIM_UF.csv (Exemplo: SIM_RJ.csv), contendo as 41 variáveis listadas no arquivo “Variáveis - Projeto - Tarefa 7 da Etapa 2.pdf”

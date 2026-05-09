@@ -609,7 +609,7 @@ dados_sim_2 <- dados_sim_2 %>% mutate(
 summary(dados_sim_2)
 
 
-# Tarefa 7. Crie um banco de dados, de nome SIM_UF.csv (Exemplo: SIM_RJ.csv), contendo as 41 variáveis listadas no arquivo “Variáveis - Projeto - Tarefa 7 da Etapa 2.pdf”
+# Tarefa 7. Crie um banco de dados, de nome SIM_UF.csv (Exemplo: SIM_RJ.csv), contendo as 41 variáveis listadas no arquivo "Variáveis - Projeto - Tarefa 7 da Etapa 2.pdf"
 # Atenção:
 # 1. Para informações gerais utilize CAUSABAS, SEXO e IDADE
 # 2. Para informações fetais utilize TIPOBITO
@@ -620,13 +620,13 @@ summary(dados_sim_2)
 # PREPARAÇÃO
 # -------------------------
 
-dados_sim_2$IDADE_STR <- sprintf(“%03d”, dados_sim_2$IDADE)
+dados_sim_2$IDADE_STR <- sprintf("%03d", dados_sim_2$IDADE)
 tipo_idade  <- substr(dados_sim_2$IDADE_STR, 1, 1)
 valor_idade <- as.numeric(substr(dados_sim_2$IDADE_STR, 2, 3))
-dados_sim_2$IDADE_DIAS <- ifelse(tipo_idade == “1”, valor_idade / 1440,
-       ifelse(tipo_idade == “2”, valor_idade / 24,
-              ifelse(tipo_idade == “3”, valor_idade,
-                     ifelse(tipo_idade == “4”, valor_idade * 365, NA))))
+dados_sim_2$IDADE_DIAS <- ifelse(tipo_idade == "1", valor_idade / 1440,
+       ifelse(tipo_idade == "2", valor_idade / 24,
+              ifelse(tipo_idade == "3", valor_idade,
+                     ifelse(tipo_idade == "4", valor_idade * 365, NA))))
 
 dados_sim_2$CAUSA_INI <- substr(dados_sim_2$CAUSABAS, 1, 1)
 idade_anos <- dados_sim_2$IDADE_DIAS / 365
@@ -651,58 +651,58 @@ contagem <- function(cond, col_name) {
 # =========================
 
 TO_df <- as.data.frame(table(dados_sim_2$CODMUNRES))
-names(TO_df) <- c(“CODMUNRES”, “TO”)
+names(TO_df) <- c("CODMUNRES", "TO")
 TO_df$CODMUNRES <- as.numeric(as.character(TO_df$CODMUNRES))
-base <- merge(base, TO_df, by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, TO_df, by = "CODMUNRES", all.x = TRUE)
 
 torc_tab <- tapply(as.integer(complete.cases(dados_sim_2)), dados_sim_2$CODMUNRES, sum, na.rm = TRUE)
-base <- merge(base, data.frame(CODMUNRES = as.numeric(names(torc_tab)), TORC = as.integer(torc_tab)), by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, data.frame(CODMUNRES = as.numeric(names(torc_tab)), TORC = as.integer(torc_tab)), by = "CODMUNRES", all.x = TRUE)
 
-vars_14 <- intersect(c(“TIPOBITO”,”DTOBITO”,”DTNASC”,”IDADE”,”SEXO”,”RACACOR”,”ESC2010”,
-                       “CODMUNRES”,”TPMORTEOCO”,”OBITOGRAV”,”OBITOPUERP”,”CAUSABAS”,”TPOBITOCOR”,”MORTEPARTO”),
+vars_14 <- intersect(c("TIPOBITO","DTOBITO","DTNASC","IDADE","SEXO","RACACOR","ESC2010",
+                       "CODMUNRES","TPMORTEOCO","OBITOGRAV","OBITOPUERP","CAUSABAS","TPOBITOCOR","MORTEPARTO"),
                      names(dados_sim_2))
 torcr_tab <- tapply(as.integer(complete.cases(dados_sim_2[, vars_14])), dados_sim_2$CODMUNRES, sum, na.rm = TRUE)
-base <- merge(base, data.frame(CODMUNRES = as.numeric(names(torcr_tab)), TORCR = as.integer(torcr_tab)), by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, data.frame(CODMUNRES = as.numeric(names(torcr_tab)), TORCR = as.integer(torcr_tab)), by = "CODMUNRES", all.x = TRUE)
 
 # =========================
 # 2. CAUSAS
 # =========================
 
-nn_cond <- dados_sim_2$CAUSA_INI %in% c(“V”, “W”, “X”, “Y”)
-base <- merge(base, contagem(nn_cond, “TO_NN”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!nn_cond & !is.na(dados_sim_2$CAUSA_INI), “TO_N”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(dados_sim_2$CAUSA_INI %in% c(“A”,”B”), “TO_CB_I”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(dados_sim_2$CAUSA_INI %in% c(“C”,”D”), “TO_CB_N”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$CAUSA_INI) & dados_sim_2$CAUSA_INI == “I”, “TO_CB_C”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$CAUSA_INI) & dados_sim_2$CAUSA_INI == “J”, “TO_CB_R”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!dados_sim_2$CAUSA_INI %in% c(“A”,”B”,”C”,”D”,”I”,”J”,”V”,”W”,”X”,”Y”) & !is.na(dados_sim_2$CAUSA_INI), “TO_CB_O”), by = “CODMUNRES”, all.x = TRUE)
+nn_cond <- dados_sim_2$CAUSA_INI %in% c("V", "W", "X", "Y")
+base <- merge(base, contagem(nn_cond, "TO_NN"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!nn_cond & !is.na(dados_sim_2$CAUSA_INI), "TO_N"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(dados_sim_2$CAUSA_INI %in% c("A","B"), "TO_CB_I"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(dados_sim_2$CAUSA_INI %in% c("C","D"), "TO_CB_N"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$CAUSA_INI) & dados_sim_2$CAUSA_INI == "I", "TO_CB_C"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$CAUSA_INI) & dados_sim_2$CAUSA_INI == "J", "TO_CB_R"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!dados_sim_2$CAUSA_INI %in% c("A","B","C","D","I","J","V","W","X","Y") & !is.na(dados_sim_2$CAUSA_INI), "TO_CB_O"), by = "CODMUNRES", all.x = TRUE)
 
 # =========================
 # 3. SEXO
 # =========================
 
-base <- merge(base, contagem(!is.na(dados_sim_2$SEXO) & dados_sim_2$SEXO == “Masculino”, “TO_M”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$SEXO) & dados_sim_2$SEXO == “Feminino”,  “TO_F”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$SEXO) & dados_sim_2$SEXO == “Feminino” &
-                             !is.na(idade_anos) & idade_anos >= 15 & idade_anos <= 49, “TO_F_IF”), by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$SEXO) & dados_sim_2$SEXO == "Masculino", "TO_M"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$SEXO) & dados_sim_2$SEXO == "Feminino",  "TO_F"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$SEXO) & dados_sim_2$SEXO == "Feminino" &
+                             !is.na(idade_anos) & idade_anos >= 15 & idade_anos <= 49, "TO_F_IF"), by = "CODMUNRES", all.x = TRUE)
 
 # =========================
 # 4. FETAL E NEONATAL
 # =========================
 
-ft_cond  <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == “Fetal”
-nt_cond  <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == “Não fetal” & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS <= 27
-ntp_cond <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == “Não fetal” & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS <= 6
-ntt_cond <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == “Não fetal” & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS >= 7  & dados_sim_2$IDADE_DIAS <= 27
-pnt_cond <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == “Não fetal” & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS >= 28 & dados_sim_2$IDADE_DIAS <= 364
-mtg_cond <- !is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == “Na gravidez”
+ft_cond  <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == "Fetal"
+nt_cond  <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == "Não fetal" & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS <= 27
+ntp_cond <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == "Não fetal" & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS <= 6
+ntt_cond <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == "Não fetal" & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS >= 7  & dados_sim_2$IDADE_DIAS <= 27
+pnt_cond <- !is.na(dados_sim_2$TIPOBITO) & dados_sim_2$TIPOBITO == "Não fetal" & !is.na(dados_sim_2$IDADE_DIAS) & dados_sim_2$IDADE_DIAS >= 28 & dados_sim_2$IDADE_DIAS <= 364
+mtg_cond <- !is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == "Na gravidez"
 
-base <- merge(base, contagem(ft_cond,  “TO_FT”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(nt_cond,  “TO_NT”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(ntp_cond, “TO_NT_P”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(ntt_cond, “TO_NT_T”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(pnt_cond, “TO_PNT”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(mtg_cond, “TO_MT_G”), by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, contagem(ft_cond,  "TO_FT"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(nt_cond,  "TO_NT"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(ntp_cond, "TO_NT_P"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(ntt_cond, "TO_NT_T"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(pnt_cond, "TO_PNT"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(mtg_cond, "TO_MT_G"), by = "CODMUNRES", all.x = TRUE)
 
 # Raça neonatal (apenas óbitos neonatais)
 dados_nt <- dados_sim_2[nt_cond, ]
@@ -713,50 +713,50 @@ raca_nt <- function(label, col_name) {
        names(df)[2] <- col_name
        df
 }
-base <- merge(base, raca_nt(“Branca”,   “TONT_B”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, raca_nt(“Preta”,    “TONT_PT”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, raca_nt(“Amarela”,  “TONT_A”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, raca_nt(“Parda”,    “TONT_PD”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, raca_nt(“Indígena”, “TONT_I”),  by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, raca_nt("Branca",   "TONT_B"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, raca_nt("Preta",    "TONT_PT"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, raca_nt("Amarela",  "TONT_A"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, raca_nt("Parda",    "TONT_PD"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, raca_nt("Indígena", "TONT_I"),  by = "CODMUNRES", all.x = TRUE)
 
 # =========================
 # 5. MATERNO
 # =========================
 
 # TPMORTEOCO já é fator com labels após Tarefa 6
-mt_todos <- c(“Na gravidez”, “No parto”, “No abortamento”,
-              “Até 42 dias após o término do parto”,
-              “De 43 dias a 1 ano após o término da gestação “)
-mt_prec  <- c(“Na gravidez”, “No parto”, “No abortamento”,
-              “Até 42 dias após o término do parto”)
+mt_todos <- c("Na gravidez", "No parto", "No abortamento",
+              "Até 42 dias após o término do parto",
+              "De 43 dias a 1 ano após o término da gestação ")
+mt_prec  <- c("Na gravidez", "No parto", "No abortamento",
+              "Até 42 dias após o término do parto")
 
 mt_cond  <- !is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO %in% mt_todos
 mtp_cond <- !is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO %in% mt_prec
 
-base <- merge(base, contagem(mt_cond,  “TO_MT”),    by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == “Na gravidez”,                               “TO_MT_DG”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == “No parto”,                                   “TO_MT_PT”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == “No abortamento”,                             “TO_MT_AB”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == “Até 42 dias após o término do parto”,        “TO_MT_42”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == “De 43 dias a 1 ano após o término da gestação “, “TO_MT_43”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(mtp_cond, “TO_MT_P”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, contagem(mtp_cond & !is.na(idade_anos) & idade_anos >= 15 & idade_anos <= 49, “TO_MT_P_I”), by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, contagem(mt_cond,  "TO_MT"),    by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == "Na gravidez",                               "TO_MT_DG"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == "No parto",                                   "TO_MT_PT"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == "No abortamento",                             "TO_MT_AB"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == "Até 42 dias após o término do parto",        "TO_MT_42"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(!is.na(dados_sim_2$TPMORTEOCO) & dados_sim_2$TPMORTEOCO == "De 43 dias a 1 ano após o término da gestação ", "TO_MT_43"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(mtp_cond, "TO_MT_P"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, contagem(mtp_cond & !is.na(idade_anos) & idade_anos >= 15 & idade_anos <= 49, "TO_MT_P_I"), by = "CODMUNRES", all.x = TRUE)
 
 esc_mt <- function(label, col_name) {
        contagem(mtp_cond & !is.na(dados_sim_2$ESC2010) & as.character(dados_sim_2$ESC2010) == label, col_name)
 }
-base <- merge(base, esc_mt(“Sem escolaridade”,                “TO_MT_P_ES”),   by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, esc_mt(“Fundamental I (1ª a 4ª série)”,  “TO_MT_P_EFI”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, esc_mt(“Fundamental II (5ª a 8ª série)”, “TO_MT_P_EFII”), by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, esc_mt(“Médio (antigo 2º Grau)”,         “TO_MT_P_EM”),   by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, esc_mt(“Superior incompleto”,            “TO_MT_P_ESI”),  by = “CODMUNRES”, all.x = TRUE)
-base <- merge(base, esc_mt(“Superior completo”,              “TO_MT_P_ESC”),  by = “CODMUNRES”, all.x = TRUE)
+base <- merge(base, esc_mt("Sem escolaridade",                "TO_MT_P_ES"),   by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, esc_mt("Fundamental I (1ª a 4ª série)",  "TO_MT_P_EFI"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, esc_mt("Fundamental II (5ª a 8ª série)", "TO_MT_P_EFII"), by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, esc_mt("Médio (antigo 2º Grau)",         "TO_MT_P_EM"),   by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, esc_mt("Superior incompleto",            "TO_MT_P_ESI"),  by = "CODMUNRES", all.x = TRUE)
+base <- merge(base, esc_mt("Superior completo",              "TO_MT_P_ESC"),  by = "CODMUNRES", all.x = TRUE)
 
 # =========================
 # 6. SUBSTITUIR NA por 0
 # =========================
 
-cols_count <- setdiff(names(base), “CODMUNRES”)
+cols_count <- setdiff(names(base), "CODMUNRES")
 base[cols_count][is.na(base[cols_count])] <- 0
 
 # =========================
@@ -768,29 +768,29 @@ linha_uf$CODMUNRES <- 22
 SIM_PI <- rbind(linha_uf, base)
 
 SIM_PI$ANO   <- 2015
-SIM_PI$NIVEL <- c(“UF”, rep(“MUNICIPIO”, nrow(SIM_PI) - 1))
+SIM_PI$NIVEL <- c("UF", rep("MUNICIPIO", nrow(SIM_PI) - 1))
 
 # =========================
 # 8. ORDENAR AS 41 COLUNAS
 # =========================
 
 ordem_41 <- c(
-       “ANO”, “NIVEL”, “CODMUNRES”,
-       “TO”, “TORC”, “TORCR”,
-       “TO_NN”, “TO_N”,
-       “TO_CB_I”, “TO_CB_N”, “TO_CB_C”, “TO_CB_R”, “TO_CB_O”,
-       “TO_M”, “TO_F”, “TO_F_IF”,
-       “TO_FT”, “TO_NT”, “TO_NT_P”, “TO_NT_T”, “TO_PNT”, “TO_MT_G”,
-       “TONT_B”, “TONT_PT”, “TONT_A”, “TONT_PD”, “TONT_I”,
-       “TO_MT”, “TO_MT_DG”, “TO_MT_PT”, “TO_MT_AB”, “TO_MT_42”, “TO_MT_43”,
-       “TO_MT_P”, “TO_MT_P_I”,
-       “TO_MT_P_ES”, “TO_MT_P_EFI”, “TO_MT_P_EFII”, “TO_MT_P_EM”, “TO_MT_P_ESI”, “TO_MT_P_ESC”
+       "ANO", "NIVEL", "CODMUNRES",
+       "TO", "TORC", "TORCR",
+       "TO_NN", "TO_N",
+       "TO_CB_I", "TO_CB_N", "TO_CB_C", "TO_CB_R", "TO_CB_O",
+       "TO_M", "TO_F", "TO_F_IF",
+       "TO_FT", "TO_NT", "TO_NT_P", "TO_NT_T", "TO_PNT", "TO_MT_G",
+       "TONT_B", "TONT_PT", "TONT_A", "TONT_PD", "TONT_I",
+       "TO_MT", "TO_MT_DG", "TO_MT_PT", "TO_MT_AB", "TO_MT_42", "TO_MT_43",
+       "TO_MT_P", "TO_MT_P_I",
+       "TO_MT_P_ES", "TO_MT_P_EFI", "TO_MT_P_EFII", "TO_MT_P_EM", "TO_MT_P_ESI", "TO_MT_P_ESC"
 )
 
 SIM_PI <- SIM_PI[, ordem_41]
 
 # Tarefa 8: Exporte o banco de dados com o nome SIM_UF.csv
-write.csv(SIM_PI, “SIM_PI.csv”, row.names = FALSE)
+write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 
 # Ao terminar a ETAPA 2 commite e envie para o repositório REMOTO com o comentário "Dados da UF e Script Etapa 2"
 # Faça um merge de script de SIM para main

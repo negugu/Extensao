@@ -1,0 +1,147 @@
+Relatório de Processamento e Análise de Dados – SINASC 2015
+1. Origem dos dados
+
+Os dados utilizados neste estudo são provenientes do Sistema de Informações sobre Nascidos Vivos (SINASC), referentes ao ano de 2015. O banco original contém registros individuais de nascimentos ocorridos no Brasil, incluindo informações sobre características maternas, do recém-nascido, da gestação e do parto.
+
+Além disso, foi utilizada uma base complementar contendo parâmetros de referência de peso ao nascer por idade gestacional e sexo, utilizada para classificação do crescimento intrauterino.
+
+2. Seleção e organização inicial das variáveis
+
+Inicialmente, foi realizada uma redução do banco de dados original, mantendo apenas as variáveis relevantes para o estudo. Essas variáveis contemplam:
+
+Identificação e localização (município de nascimento e residência)
+Características maternas (idade, estado civil, escolaridade, raça/cor)
+Informações da gestação (tipo de gravidez, duração gestacional, número de consultas pré-natal)
+Informações do parto (tipo de parto, apresentação fetal)
+Características do recém-nascido (sexo, peso, Apgar, presença de anomalias)
+
+Essa etapa teve como objetivo tornar o banco mais eficiente e focado nas análises pretendidas.
+
+3. Filtragem geográfica
+
+O banco de dados foi filtrado para considerar apenas os registros de um estado específico, identificado pelos dois primeiros dígitos do código do município de residência. No caso analisado, foram selecionados apenas os registros correspondentes ao estado do Piauí.
+
+Após essa filtragem, o banco foi exportado e posteriormente reimportado, garantindo sua persistência e organização.
+
+4. Análise exploratória inicial
+
+Foi realizada uma análise exploratória para compreender a distribuição das variáveis, incluindo:
+
+Frequência das categorias das variáveis qualitativas
+Identificação dos valores únicos de variáveis quantitativas
+Resumos estatísticos iniciais, especialmente para o peso ao nascer
+
+Essa etapa permitiu identificar inconsistências, categorias inválidas e possíveis valores ausentes codificados de forma inadequada.
+
+5. Tratamento de dados faltantes
+
+Foi realizado um processo de limpeza dos dados, no qual valores que representavam ausência de informação (como códigos específicos definidos no dicionário do SINASC) foram convertidos para valores ausentes (NA).
+
+Esse procedimento foi aplicado tanto para variáveis qualitativas quanto quantitativas, garantindo maior consistência nas análises posteriores.
+
+Também foram calculadas métricas relacionadas à completude dos dados, como:
+
+Total de registros
+Total de registros completos (sem valores ausentes)
+Totais por município
+6. Padronização e rotulagem das variáveis categóricas
+
+As variáveis categóricas foram transformadas para um formato mais interpretável, substituindo códigos numéricos por descrições textuais padronizadas.
+
+Essa padronização incluiu variáveis como:
+
+Local de nascimento
+Estado civil
+Duração da gestação
+Tipo de parto
+Sexo
+Raça/cor
+Escolaridade
+Classificação do pré-natal
+
+O objetivo foi facilitar a interpretação dos resultados e garantir consistência semântica.
+
+7. Criação de variáveis derivadas
+
+Foram criadas novas variáveis a partir das informações existentes, com destaque para:
+
+Faixas de idade materna, categorizando em grupos etários
+Classificação do peso ao nascer, distinguindo baixo peso, peso adequado e macrossomia
+Classificação do Apgar, separando casos normais e baixos
+Peregrinação materna, indicando se o parto ocorreu fora do município de residência
+Situação conjugal simplificada, agrupando em “com” ou “sem companheiro”
+
+Essas variáveis foram construídas para facilitar análises epidemiológicas e interpretação dos resultados.
+
+8. Integração com base externa e classificação PIG/AIG/GIG
+
+O banco principal foi integrado com uma tabela de referência que contém percentis de peso ao nascer (P10 e P90), de acordo com idade gestacional e sexo do recém-nascido.
+
+A partir dessa integração, foi criada uma nova variável classificando os recém-nascidos em:
+
+Pequeno para a idade gestacional (PIG)
+Adequado para a idade gestacional (AIG)
+Grande para a idade gestacional (GIG)
+
+Essa classificação foi aplicada apenas para gestações únicas e quando havia informações completas.
+
+9. Construção de indicadores agregados por município
+
+Foi criada uma base agregada por município de residência, contendo:
+
+Totais de nascimentos
+Totais de registros completos
+Frequências de categorias das variáveis analisadas
+Indicadores derivados (ex: tipos de parto, grupos de Robson, categorias de peso, etc.)
+
+Para garantir consistência, foi adotado um procedimento que assegura que todas as categorias possíveis estejam representadas, mesmo quando não há ocorrência.
+
+10. Cálculo de medidas descritivas
+
+Para variáveis quantitativas, foram calculadas medidas estatísticas por município, incluindo:
+
+Percentis (25%, 50% e 75%)
+Média
+Desvio padrão
+
+Essas medidas foram obtidas para:
+
+Idade materna
+Duração da gestação
+Peso ao nascer
+Índice de Apgar no 5º minuto
+11. Criação de agregação estadual
+
+Além da análise municipal, foi construída uma linha representando o total do estado, agregando:
+
+Somatórios das variáveis de contagem
+Estatísticas descritivas globais
+
+Essa linha permite comparações entre municípios e o estado como um todo.
+
+12. Estruturação final do banco de dados
+
+O banco final foi organizado com:
+
+Inclusão do ano de referência (2015)
+Identificação do nível de agregação (município ou estado)
+Ordenação padronizada das variáveis (totalizando 103 indicadores)
+
+Também foi realizada uma padronização numérica, com arredondamento das variáveis quantitativas.
+
+13. Exportação dos resultados
+
+Por fim, o banco de dados final foi exportado em formato CSV, contendo todos os indicadores construídos, pronto para uso em análises estatísticas, relatórios ou visualizações.
+
+Conclusão
+
+O processo realizado envolveu um fluxo completo de preparação de dados, incluindo:
+
+Seleção e filtragem
+Limpeza e tratamento de valores ausentes
+Transformações e criação de variáveis
+Integração com dados externos
+Construção de indicadores agregados
+Geração de estatísticas descritivas
+
+O resultado final é um banco estruturado e padronizado, adequado para análises epidemiológicas sobre nascimentos no estado selecionado.

@@ -1,0 +1,201 @@
+Variáveis – Projeto – Tarefa 7 da Etapa 2
+
+Coluna
+
+Variável
+
+1
+2
+3
+
+ANO
+NIVEL
+CODMUNRES
+
+4
+
+TO
+
+5
+
+TORC
+
+6
+
+TORCR
+
+7
+8
+
+TO_NN
+TO_N
+
+9
+
+TO_CB_I
+
+10
+
+TO_CB_N
+
+11
+12
+
+TO_CB_C
+TO_CB_R
+
+13
+
+TO_CB_O
+
+14
+15
+16
+
+TO_M
+TO_F
+TO_F_IF
+
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+
+TO_FT
+TO_NT
+TO_NT_P
+TO_NT_T
+TO_PNT
+TO_MT_G
+TONT_B
+TONT_PT
+TONT_A
+TONT_PD
+TONT_I
+
+28
+29
+30
+31
+32
+
+TO_MT
+TO_MT_DG
+TO_MT_PT
+TO_MT_AB
+TO_MT_42
+
+33
+
+TO_MT_43
+
+Descrição
+Identificadores do banco de dados
+ano de referência (para os alunos de 2026/1 será 2015)
+nível da informação: UF ou MUNICIPIO
+Código da UF ou do município de residência segundo IBGE
+Informações de Óbitos - SIM
+Informações Gerais
+total de óbitos
+total de óbitos com registros completos (sem qualquer NA) nas 87
+variáveis do SIM
+total de óbitos com registros completos (sem qualquer NA) nas 14
+variáveis selecionadas do SIM
+total de óbitos não naturais (inicial de CAUSABAS = V, W, X ou Y)
+total de óbitos naturais (inicial de CAUSABAS ≠ V, W, X ou Y)
+total de óbitos por doenças infecciosas ou parasitárias (inicial de
+CAUSABAS = A ou B)
+total de óbitos por neoplasias ou doenças hematológicas (inicial de
+CAUSABAS = C ou D)
+total de óbitos por doenças circulatórias (inicial de CAUSABAS = I)
+total de óbitos por doenças respiratórias (inicial de CAUSABAS = J)
+total de óbitos por outras causas naturais (inicial de CAUSABAS ≠ A, B,
+C, D, I, J, V, W, X ou Y)
+total de óbitos masculinos
+total de óbitos femininos
+total de óbitos femininos em idade fértil (idade >=15 e <=49 anos)
+Informações fetais e neonatais
+total de óbitos fetais
+total de óbitos neonatais (0 <= idade <= 27 dias)
+total de óbitos neonatais precoces (0 <= idade <= 6 dias)
+total de óbitos neonatais tardios (7 <= idade <= 27 dias)
+total de óbitos pós-neonatal (28 dias <=idade <= 364 dias)
+total de óbitos maternos durante a gestação (antes do parto)
+total de óbitos neonatais (0 <= idade <= 27 dias) da raça/cor branca
+total de óbitos neonatais (0 <= idade <= 27 dias) da raça/cor preta
+total de óbitos neonatais (0 <= idade <= 27 dias) da raça/cor amarela
+total de óbitos neonatais (0 <= idade <= 27 dias) da raça/cor parda
+total de óbitos neonatais (0 <= idade <= 27 dias) da raça/cor indígena
+Informações maternas
+total de óbitos maternos (precoces e tardios)
+total de óbitos maternos durante a gestação
+total de óbitos maternos no parto
+total de óbitos maternos no abortamento
+total de óbitos maternos até 42 dias após o parto
+total de óbitos maternos tardio (de 43 a 364 dias após o término da
+gestação)
+
+34
+
+TO_MT_P
+
+35
+
+TO_MT_P_I
+
+36
+
+TO_MT_P_ES
+
+37
+
+TO_MT_P_EFI
+
+38
+
+TO_MT_P_EFII
+
+39
+
+TO_MT_P_EM
+
+40
+
+TO_MT_P_ESI
+
+41
+
+TO_MT_P_ESC
+
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto)
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres em idade
+fértil (idade >=15 e <=49 anos)
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres sem
+escolaridade
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres com
+escolaridade fundamental I
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres com
+escolaridade fundamental II
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres com
+escolaridade médio
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres com
+escolaridade superior incompleto
+total de óbitos maternos precoces (na gestação ou no parto ou no
+abortamento ou em até 42 dias após o parto) de mulheres com
+escolaridade superior completo
+
+

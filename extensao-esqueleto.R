@@ -811,6 +811,12 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 3. população residente censo 2010 - por faixa etária -  UF - SIDRA - tabela_1552.csv
 # 4. população residente censo 2010 - por faixa etária e sexo -  municípios - SIDRA - tabela_1552.csv
 
+pop_est_2015 <- read.csv2("população residente estimada - UF e municípios - 2015 - SIDRA - tabela_6579.csv")
+pop_censo_2010 <- read.csv2("população residente censo 2010 - UF e municípios - total e por sexo - SIDRA - tabela_1552.csv")
+pop_age_uf <- read.csv2("população residente censo 2010 - por faixa etária -  UF - SIDRA - tabela_1552.csv")
+pop_age_mun <- read.csv2("população residente censo 2010 - por faixa etária e sexo -  municípios - SIDRA - tabela_1552.csv")
+
+
 # A partir dos arquivos acima gere o banco de dados de nome SIDRA_UF com as seguintes variáveis:
 # 1  ANO    
 # 2  NIVEL
@@ -826,10 +832,101 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 12 POPRC_F_15_49
 # 13 POPRC_F_50
 
+# Filtra municípios que começam com 22 e a linha da UF 22
+pop_est_2015 <- pop_est_2015 %>% filter(substr(CODMUNRES, 1, 2) == "22")
+pop_censo_2010 <- pop_censo_2010 %>% filter(substr(CODMUNRES, 1, 2) == "22")
+pop_age_uf <- pop_age_uf %>% filter(CODMUNRES == 22)
+pop_age_mun <- pop_age_mun %>% filter(substr(CODMUNRES, 1, 2) == "22")
+
+
+
+# 4. Processamento das Faixas Etárias (Censo 2010)
+# Agrupando as faixas etárias brutas em 0-14, 15-49 e 50+
+faixa_15 <- c("0 a 4 anos", "5 a 9 anos", "10 a 14 anos")
+faixa_15_49 <- c("15 a 19 anos", "20 a 24 anos", "25 a 29 anos", "30 a 34 anos", 
+                 "35 a 39 anos", "40 a 44 anos", "45 a 49 anos")
+
+# Unindo dados de faixa etária de UF e Municípios
+pop_age_all <- bind_rows(
+  pop_age_uf %>% select(CODMUNRES, F_IDADE, POP, POPM, POPF),
+  pop_age_mun %>% select(CODMUNRES, F_IDADE, POP, POPM, POPF)
+)
+
+pop_age_agg <- pop_age_all %>%
+  mutate(
+    cat = case_when(
+      F_IDADE %in% faixa_15 ~ "15",
+      F_IDADE %in% faixa_15_49 ~ "15_49",
+      TRUE ~ "50"
+    )
+  ) %>%
+  group_by(CODMUNRES, cat) %>%
+  summarise(
+    POPRC_age = sum(POP, na.rm = TRUE),
+    POPRC_F_age = sum(POPF, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  # Pivotagem corrigida: usamos {cat} que é o nome da nossa coluna de categorias
+  pivot_wider(
+    names_from = cat,
+    values_from = c(POPRC_age, POPRC_F_age),
+    names_glue = "{.value}_{cat}"
+  ) %>%
+  # Renomeando para os nomes exatos solicitados na tarefa
+  rename(
+    POPRC_15 = POPRC_age_15,
+    POPRC_15_49 = POPRC_age_15_49,
+    POPRC_50 = POPRC_age_50,
+    POPRC_F_15 = POPRC_F_age_15,
+    POPRC_F_15_49 = POPRC_F_age_15_49,
+    POPRC_F_50 = POPRC_F_age_50
+  )
+
+
+# 5. Montagem do Banco de Dados Final (SIDRA_UF)
+SIDRA_UF <- pop_est_2015 %>%
+  select(CODMUNRES, POPRE_T) %>%
+  left_join(pop_censo_2010 %>% select(CODMUNRES, POPRC_T, POPRC_M, POPRC_F), by = "CODMUNRES") %>%
+  left_join(pop_age_agg, by = "CODMUNRES") %>%
+  mutate(
+    ANO = 2015,
+    NIVEL = ifelse(nchar(as.character(CODMUNRES)) == 2, "UF", "MUNICIPIO")
+  ) %>%
+  select(
+    ANO, NIVEL, CODMUNRES, 
+    POPRE_T, POPRC_T, POPRC_M, POPRC_F, 
+    POPRC_15, POPRC_15_49, POPRC_50, 
+    POPRC_F_15, POPRC_F_15_49, POPRC_F_50
+  )
+
 
 
 # Exporte o arquivo em formato CSV
+
+write.csv(SIDRA_UF, "SIDRA_PI.csv", row.names = FALSE)
 # Faça o commit com a mensagem "Script e dados TAREFA 3 - SIDRA"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #####################################################################################################
 # ETAPA 4: GERAR BANCO DE DADOS FINAL DO ESTADO, BASEADO NAS ANÁLISES DE SINASC, SIM, IBGE, SNIS,...

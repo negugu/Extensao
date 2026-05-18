@@ -906,7 +906,61 @@ SIDRA_UF <- pop_est_2015 %>%
 write.csv(SIDRA_UF, "SIDRA_PI.csv", row.names = FALSE)
 # Faça o commit com a mensagem "Script e dados TAREFA 3 - SIDRA"
 
+#Tarefa 2: Acesso aos bancos de dados do SINISA e obtenção da informação
+# Escreva os comandos da Tarefa 2 estando na branch OUTROS# Leia o arquivo agua e esgoto - município - 2015.csv 
+library(tidyverse)
+agua_esgoto = read.csv2("agua e esgoto - município - 2015.csv")
 
+
+# A partir do arquivo acima gere o banco de dados de nome SINISA_UF com as seguintes variáveis:
+# 1  ANO    
+# 2  NIVEL
+# 3  CODMUNRES
+# 4 POPR_RA
+# 5 POPR_RE
+
+agua_esgoto = agua_esgoto %>% filter(substr(CODMUNRES, 1, 2) == "22")
+agua_esgoto = agua_esgoto %>% rename(ANO =  Ano.de.Referência,
+                                     POPRE_RA = POPR_RA,
+                                     POPRE_RE= POPR_RE
+)
+agua_esgoto = agua_esgoto %>% mutate(NIVEL = "MUNICIPIO",
+                                     POPRE_RA = as.numeric(POPRE_RA),
+                                     POPRE_RE = as.numeric(POPRE_RE)) %>% 
+  select(ANO,NIVEL,CODMUNRES,POPRE_RA,POPRE_RE)
+
+linha_uf <- agua_esgoto %>%
+  summarise(
+    ANO = 2015,
+    NIVEL = "UF",
+    CODMUNRES = 22,
+    POPRE_RA = sum(POPRE_RA, na.rm = TRUE),
+    POPRE_RE = sum(POPRE_RE, na.rm = TRUE)
+  )
+
+SINISA_PI= bind_rows(linha_uf,agua_esgoto)
+
+# Exporte o arquivo em formato CSV
+
+write.csv(SINISA_PI , file = "SINISA_PI.csv")
+# Faça o commit com a mensagem "Script e dados TAREFA 3 - SINISA"
+
+# Tarefa 3: Acesso aos bancos de dados do ATLAS  e obtenção da informação
+# Escreva os comandos da Tarefa 3 estando na branch OUTROS
+# Leia os arquivos:
+# 1. códigos dos municípios - 2010.csv      
+# 2. IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv
+# 3. IDHM - 2010 - municípios - Atlas Brasil.csv
+# A partir do arquivo acima gere o banco de dados de nome ATLAS_UF com as seguintes variáveis:
+# 1  ANO    
+# 2  NIVEL
+# 3  CODMUNRES
+# 4 IDHM_A
+# 5 IDHM_CA
+# 6 IDHM_CA_M
+# 7 IDHM_CA_F
+
+# Exporte o arquivo em formato CSV# Faça o commit com a mensagem "Script e dados TAREFA 3 - ATLAS"
 
 
 

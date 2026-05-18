@@ -951,6 +951,16 @@ write.csv(SINISA_PI , file = "SINISA_PI.csv")
 # 1. códigos dos municípios - 2010.csv      
 # 2. IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv
 # 3. IDHM - 2010 - municípios - Atlas Brasil.csv
+codmun = read_delim("códigos dos municípios - 2010.csv", 
+                    delim = "\t", escape_double = FALSE, 
+                    trim_ws = TRUE)
+
+IDHM_tot_sex = read_delim("IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv",delim = "\t")
+IDHM_mun = read_delim("IDHM - 2010 - municípios - Atlas Brasil.csv",delim = "\t")
+
+
+
+
 # A partir do arquivo acima gere o banco de dados de nome ATLAS_UF com as seguintes variáveis:
 # 1  ANO    
 # 2  NIVEL

@@ -951,13 +951,11 @@ write.csv(SINISA_PI , file = "SINISA_PI.csv")
 # 1. códigos dos municípios - 2010.csv      
 # 2. IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv
 # 3. IDHM - 2010 - municípios - Atlas Brasil.csv
-codmun = read_delim("códigos dos municípios - 2010.csv", 
-                    delim = "\t", escape_double = FALSE, 
-                    trim_ws = TRUE)
 
-IDHM_tot_sex = read_delim("IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv",delim = "\t")
-IDHM_mun = read_delim("IDHM - 2010 - municípios - Atlas Brasil.csv",delim = "\t")
 
+codmun = read_csv2("códigos dos municípios - 2010.csv") 
+IDHM_tot_sex = read.csv2("IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv")
+IDHM_mun = read.csv2("IDHM - 2010 - municípios - Atlas Brasil.csv")
 
 
 
@@ -970,26 +968,54 @@ IDHM_mun = read_delim("IDHM - 2010 - municípios - Atlas Brasil.csv",delim = "\t
 # 6 IDHM_CA_M
 # 7 IDHM_CA_F
 
-# Exporte o arquivo em formato CSV# Faça o commit com a mensagem "Script e dados TAREFA 3 - ATLAS"
+
+
+linha_uf <- IDHM_tot_sex %>%
+  filter(UF == "Piauí") %>%
+  mutate(
+    ANO = 2015,
+    NIVEL = "UF",
+    CODMUNRES = "22", # Código do IBGE para o Piauí como caractere para bater com os municípios
+    IDHM_A = IDHM_2015,
+    IDHM_CA = IDHM_2010,
+    IDHM_CA_M = IDHM_2010_M,
+    IDHM_CA_F = IDHM_2010_F
+  ) %>%
+  select(ANO, NIVEL, CODMUNRES, IDHM_A, IDHM_CA, IDHM_CA_M, IDHM_CA_F)
 
 
 
+IDHM_mun <- IDHM_mun %>% 
+  filter(str_ends(município, " \\(PI\\)")) %>% 
+  mutate(município = str_sub(município, start = 1, end = -6))
 
 
+codmun <- codmun %>% 
+  filter(str_starts(as.character(CODMUNRES), "22"))
+
+ATLAS_MUN <- IDHM_mun%>%
+  left_join(codmun, by = "município") %>%
+  mutate(
+    ANO = 2015,
+    NIVEL = "MUNICIPIO",
+    CODMUNRES = as.character(CODMUNRES),
+    IDHM_A = NA_real_,      
+    IDHM_CA = IDHM_2010,    
+    IDHM_CA_M = NA_real_,   
+    IDHM_CA_F = NA_real_    
+  ) %>%
+  select(ANO, NIVEL, CODMUNRES, IDHM_A, IDHM_CA, IDHM_CA_M, IDHM_CA_F)
 
 
+ATLAS_PI <- bind_rows(linha_uf, ATLAS_MUN)
 
 
+# Exporte o arquivo em formato CSV
+
+write_csv(ATLAS_PI, "ATLAS_PI.csv")
 
 
-
-
-
-
-
-
-
-
+# Faça o commit com a mensagem "Script e dados TAREFA 3 - ATLAS"
 
 
 #####################################################################################################

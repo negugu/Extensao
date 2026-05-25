@@ -811,6 +811,12 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 3. população residente censo 2010 - por faixa etária -  UF - SIDRA - tabela_1552.csv
 # 4. população residente censo 2010 - por faixa etária e sexo -  municípios - SIDRA - tabela_1552.csv
 
+pop_est_2015 <- read.csv2("população residente estimada - UF e municípios - 2015 - SIDRA - tabela_6579.csv")
+pop_censo_2010 <- read.csv2("população residente censo 2010 - UF e municípios - total e por sexo - SIDRA - tabela_1552.csv")
+pop_age_uf <- read.csv2("população residente censo 2010 - por faixa etária -  UF - SIDRA - tabela_1552.csv")
+pop_age_mun <- read.csv2("população residente censo 2010 - por faixa etária e sexo -  municípios - SIDRA - tabela_1552.csv")
+
+
 # A partir dos arquivos acima gere o banco de dados de nome SIDRA_UF com as seguintes variáveis:
 # 1  ANO    
 # 2  NIVEL
@@ -826,11 +832,80 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 12 POPRC_F_15_49
 # 13 POPRC_F_50
 
+# Filtra municípios que começam com 22 e a linha da UF 22
+pop_est_2015 <- pop_est_2015 %>% filter(substr(CODMUNRES, 1, 2) == "22")
+pop_censo_2010 <- pop_censo_2010 %>% filter(substr(CODMUNRES, 1, 2) == "22")
+pop_age_uf <- pop_age_uf %>% filter(CODMUNRES == 22)
+pop_age_mun <- pop_age_mun %>% filter(substr(CODMUNRES, 1, 2) == "22")
+
+# 4. Processamento das Faixas Etárias (Censo 2010)
+# Agrupando as faixas etárias brutas em 0-14, 15-49 e 50+
+faixa_15 <- c("0 a 4 anos", "5 a 9 anos", "10 a 14 anos")
+faixa_15_49 <- c("15 a 19 anos", "20 a 24 anos", "25 a 29 anos", "30 a 34 anos", 
+                 "35 a 39 anos", "40 a 44 anos", "45 a 49 anos")
+
+# Unindo dados de faixa etária de UF e Municípios
+pop_age_all <- bind_rows(
+  pop_age_uf %>% select(CODMUNRES, F_IDADE, POP, POPM, POPF),
+  pop_age_mun %>% select(CODMUNRES, F_IDADE, POP, POPM, POPF)
+)
+
+pop_age_agg <- pop_age_all %>%
+  mutate(
+    cat = case_when(
+      F_IDADE %in% faixa_15 ~ "15",
+      F_IDADE %in% faixa_15_49 ~ "15_49",
+      TRUE ~ "50"
+    )
+  ) %>%
+  group_by(CODMUNRES, cat) %>%
+  summarise(
+    POPRC_age = sum(POP, na.rm = TRUE),
+    POPRC_F_age = sum(POPF, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  # Pivotagem corrigida: usamos {cat} que é o nome da nossa coluna de categorias
+  pivot_wider(
+    names_from = cat,
+    values_from = c(POPRC_age, POPRC_F_age),
+    names_glue = "{.value}_{cat}"
+  ) %>%
+  # Renomeando para os nomes exatos solicitados na tarefa
+  rename(
+    POPRC_15 = POPRC_age_15,
+    POPRC_15_49 = POPRC_age_15_49,
+    POPRC_50 = POPRC_age_50,
+    POPRC_F_15 = POPRC_F_age_15,
+    POPRC_F_15_49 = POPRC_F_age_15_49,
+    POPRC_F_50 = POPRC_F_age_50
+  )
+
+
+# 5. Montagem do Banco de Dados Final (SIDRA_UF)
+SIDRA_UF <- pop_est_2015 %>%
+  select(CODMUNRES, POPRE_T) %>%
+  left_join(pop_censo_2010 %>% select(CODMUNRES, POPRC_T, POPRC_M, POPRC_F), by = "CODMUNRES") %>%
+  left_join(pop_age_agg, by = "CODMUNRES") %>%
+  mutate(
+    ANO = 2015,
+    NIVEL = ifelse(nchar(as.character(CODMUNRES)) == 2, "UF", "MUNICIPIO")
+  ) %>%
+  select(
+    ANO, NIVEL, CODMUNRES, 
+    POPRE_T, POPRC_T, POPRC_M, POPRC_F, 
+    POPRC_15, POPRC_15_49, POPRC_50, 
+    POPRC_F_15, POPRC_F_15_49, POPRC_F_50
+  )
+
 # Exporte o arquivo em formato CSV
+write.csv(SIDRA_UF, "SIDRA_PI.csv", row.names = FALSE)
 # Faça o commit com a mensagem "Script e dados TAREFA 3 - SIDRA"
 
-# Tarefa 2: Acesso aos bancos de dados do SINISA e obtenção da informação
+#Tarefa 2: Acesso aos bancos de dados do SINISA e obtenção da informação
 # Escreva os comandos da Tarefa 2 estando na branch OUTROS# Leia o arquivo agua e esgoto - município - 2015.csv 
+library(tidyverse)
+agua_esgoto = read.csv2("agua e esgoto - município - 2015.csv")
+
 # A partir do arquivo acima gere o banco de dados de nome SINISA_UF com as seguintes variáveis:
 # 1  ANO    
 # 2  NIVEL
@@ -838,7 +913,29 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 4 POPR_RA
 # 5 POPR_RE
 
+agua_esgoto = agua_esgoto %>% filter(substr(CODMUNRES, 1, 2) == "22")
+agua_esgoto = agua_esgoto %>% rename(ANO =  Ano.de.Referência,
+                                     POPRE_RA = POPR_RA,
+                                     POPRE_RE= POPR_RE
+)
+agua_esgoto = agua_esgoto %>% mutate(NIVEL = "MUNICIPIO",
+                                     POPRE_RA = as.numeric(POPRE_RA),
+                                     POPRE_RE = as.numeric(POPRE_RE)) %>% 
+  select(ANO,NIVEL,CODMUNRES,POPRE_RA,POPRE_RE)
+
+linha_uf <- agua_esgoto %>%
+  summarise(
+    ANO = 2015,
+    NIVEL = "UF",
+    CODMUNRES = 22,
+    POPRE_RA = sum(POPRE_RA, na.rm = TRUE),
+    POPRE_RE = sum(POPRE_RE, na.rm = TRUE)
+  )
+
+SINISA_PI= bind_rows(linha_uf,agua_esgoto)
+
 # Exporte o arquivo em formato CSV
+write.csv(SINISA_PI , file = "SINISA_PI.csv")
 # Faça o commit com a mensagem "Script e dados TAREFA 3 - SINISA"
 
 # Tarefa 3: Acesso aos bancos de dados do ATLAS  e obtenção da informação
@@ -847,6 +944,11 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 1. códigos dos municípios - 2010.csv      
 # 2. IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv
 # 3. IDHM - 2010 - municípios - Atlas Brasil.csv
+
+codmun = read_csv2("códigos dos municípios - 2010.csv") 
+IDHM_tot_sex = read.csv2("IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv")
+IDHM_mun = read.csv2("IDHM - 2010 - municípios - Atlas Brasil.csv")
+
 # A partir do arquivo acima gere o banco de dados de nome ATLAS_UF com as seguintes variáveis:
 # 1  ANO    
 # 2  NIVEL
@@ -856,7 +958,45 @@ write.csv(SIM_PI, "SIM_PI.csv", row.names = FALSE)
 # 6 IDHM_CA_M
 # 7 IDHM_CA_F
 
-# Exporte o arquivo em formato CSV# Faça o commit com a mensagem "Script e dados TAREFA 3 - ATLAS"
+linha_uf <- IDHM_tot_sex %>%
+  filter(UF == "Piauí") %>%
+  mutate(
+    ANO = 2015,
+    NIVEL = "UF",
+    CODMUNRES = "22", # Código do IBGE para o Piauí como caractere para bater com os municípios
+    IDHM_A = IDHM_2015,
+    IDHM_CA = IDHM_2010,
+    IDHM_CA_M = IDHM_2010_M,
+    IDHM_CA_F = IDHM_2010_F
+  ) %>%
+  select(ANO, NIVEL, CODMUNRES, IDHM_A, IDHM_CA, IDHM_CA_M, IDHM_CA_F)
+
+IDHM_mun <- IDHM_mun %>% 
+  filter(str_ends(município, " \\(PI\\)")) %>% 
+  mutate(município = str_sub(município, start = 1, end = -6))
+
+codmun <- codmun %>% 
+  filter(str_starts(as.character(CODMUNRES), "22"))
+
+ATLAS_MUN <- IDHM_mun%>%
+  left_join(codmun, by = "município") %>%
+  mutate(
+    ANO = 2015,
+    NIVEL = "MUNICIPIO",
+    CODMUNRES = as.character(CODMUNRES),
+    IDHM_A = NA_real_,      
+    IDHM_CA = IDHM_2010,    
+    IDHM_CA_M = NA_real_,   
+    IDHM_CA_F = NA_real_    
+  ) %>%
+  select(ANO, NIVEL, CODMUNRES, IDHM_A, IDHM_CA, IDHM_CA_M, IDHM_CA_F)
+
+ATLAS_PI <- bind_rows(linha_uf, ATLAS_MUN)
+
+# Exporte o arquivo em formato CSV
+write_csv(ATLAS_PI, "ATLAS_PI.csv")
+
+# Faça o commit com a mensagem "Script e dados TAREFA 3 - ATLAS"
 #####################################################################################################
 # ETAPA 4: GERAR BANCO DE DADOS FINAL DO ESTADO, BASEADO NAS ANÁLISES DE SINASC, SIM, IBGE, SNIS,...
 ######################################################################################################

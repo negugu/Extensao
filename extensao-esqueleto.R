@@ -1064,8 +1064,40 @@ write.csv(DA_PI, "DA_PI.csv", row.names = FALSE)
 
 # Tarefa 2: Acrescentar no banco DA_UF os indicadores TFG, TMG, RMM, TMM, TMM_P, TMN,
 # TMN_P, TMN_T e TMI e chamar o banco de BDEM_UF_2015
-# Após a criação do banco, fazer commit "Script e dados BDEM_UF_2015"
 
+BDEM_PI_2015 <- DA_PI %>%
+  mutate(
+    # TFG: Taxa de Fecundidade Geral = nascimentos / mulheres em idade fértil (15-49) x 1000
+    TFG     = round(TN / POPRC_F_15_49 * 1000, 2),
+    
+    # TMG: Taxa de Mortalidade Geral = total de óbitos / população estimada x 1000
+    TMG     = round(TO / POPRE_T * 1000, 2),
+    
+    # RMM: Razão de Mortalidade Materna = óbitos maternos precoces / nascidos vivos x 100.000
+    RMM     = round(TO_MT_P / TN * 100000, 2),
+    
+    # TMM: Taxa de Mortalidade Materna (todas as fases) = óbitos maternos / pop feminina IF x 100.000
+    TMM     = round(TO_MT / POPRC_F_15_49 * 100000, 2),
+    
+    # TMM_P: TMM Precoce (até 42 dias pós-parto) = óbitos maternos precoces / pop feminina IF x 100.000
+    TMM_P   = round(TO_MT_P / POPRC_F_15_49 * 100000, 2),
+    
+    # TMN: Taxa de Mortalidade Neonatal = óbitos neonatais / nascidos vivos x 1000
+    TMN     = round(TO_NT / TN * 1000, 2),
+    
+    # TMN_P: TMN Precoce (0-6 dias) = óbitos neonatais precoces / nascidos vivos x 1000
+    TMN_P   = round(TO_NT_P / TN * 1000, 2),
+    
+    # TMN_T: TMN Tardia (7-27 dias) = óbitos neonatais tardios / nascidos vivos x 1000
+    TMN_T   = round(TO_NT_T / TN * 1000, 2),
+    
+    # TMI: Taxa de Mortalidade Infantil = (neonatais + pós-neonatais) / nascidos vivos x 1000
+    TMI     = round((TO_NT + TO_PNT) / TN * 1000, 2)
+  )
+
+write.csv(BDEM_PI_2015, "BDEM_PI_2015.csv", row.names = FALSE)
+
+# Após a criação do banco, fazer commit "Script e dados BDEM_UF_2015"
 
 
 

@@ -1008,12 +1008,63 @@ write_csv(ATLAS_PI, "ATLAS_PI.csv")
 # da SINISA. No merge deve constar qualquer município que esteja em pelo menos um dos bancos
 # Chamar o banco de dados de DA_UF
 
-# Após o merge dos bancos, fazer commit “Script e dados agregados da UF”
+library(tidyverse)
+
+SIDRA_PI  <- read.csv("SIDRA_PI.csv")
+ATLAS_PI  <- read.csv("ATLAS_PI.csv")
+SINASC_PI <- read.csv("SINASC_PI.csv")
+SIM_PI    <- read.csv("SIM_PI.csv")
+SINISA_PI <- read.csv("SINISA_PI.csv")
+
+# Remover coluna de índice do SINISA caso exista
+if ("X" %in% names(SINISA_PI)) SINISA_PI <- SINISA_PI %>% select(-X)
+
+# Converter CODMUNRES para numérico em todos os bancos para garantir compatibilidade
+SIDRA_PI$CODMUNRES  <- as.numeric(SIDRA_PI$CODMUNRES)
+ATLAS_PI$CODMUNRES  <- as.numeric(ATLAS_PI$CODMUNRES)
+SINASC_PI$CODMUNRES <- as.numeric(SINASC_PI$CODMUNRES)
+SIM_PI$CODMUNRES    <- as.numeric(SIM_PI$CODMUNRES)
+SINISA_PI$CODMUNRES <- as.numeric(SINISA_PI$CODMUNRES)
+
+# SIDRA e ATLAS usam código de 7 dígitos (com dígito verificador); os demais usam 6 dígitos.
+# Padronizar para 6 dígitos removendo o último dígito dos municípios do SIDRA e ATLAS.
+# O código da UF (22) tem apenas 2 dígitos e não deve ser alterado.
+truncar_codmun <- function(cod) {
+  ifelse(nchar(as.character(cod)) == 7, as.numeric(substr(as.character(cod), 1, 6)), cod)
+}
+SIDRA_PI$CODMUNRES <- truncar_codmun(SIDRA_PI$CODMUNRES)
+ATLAS_PI$CODMUNRES <- truncar_codmun(ATLAS_PI$CODMUNRES)
+
+# Código 220000 do SINASC e SIM — não é município real do Piauí,
+# é um código inválido do DATASUS para registros com município não identificado.
+# SINASC_PI <- SINASC_PI %>% filter(CODMUNRES != 220000)
+# SIM_PI    <- SIM_PI    %>% filter(CODMUNRES != 220000)
+
+
+
+
+# Colunas a excluir dos bancos secundários (ANO e NIVEL vêm apenas do primeiro)
+excluir <- c("ANO", "NIVEL")
+
+DA_PI <- SIDRA_PI %>%
+  full_join(ATLAS_PI  %>% select(-all_of(excluir)), by = "CODMUNRES") %>%
+  full_join(SINASC_PI %>% select(-all_of(excluir)), by = "CODMUNRES") %>%
+  full_join(SIM_PI    %>% select(-all_of(excluir)), by = "CODMUNRES") %>%
+  full_join(SINISA_PI %>% select(-all_of(excluir)), by = "CODMUNRES") %>%
+  # Preencher ANO e NIVEL para municípios que existem em outros bancos mas não no SIDRA
+  mutate(
+    ANO   = ifelse(is.na(ANO), 2015, ANO),
+    NIVEL = ifelse(is.na(NIVEL), ifelse(nchar(as.character(CODMUNRES)) == 2, "UF", "MUNICIPIO"), NIVEL)
+  ) %>%
+  arrange(desc(NIVEL == "UF"), CODMUNRES)
+
+write.csv(DA_PI, "DA_PI.csv", row.names = FALSE)
+
+# Após o merge dos bancos, fazer commit "Script e dados agregados da UF"
 
 # Tarefa 2: Acrescentar no banco DA_UF os indicadores TFG, TMG, RMM, TMM, TMM_P, TMN,
 # TMN_P, TMN_T e TMI e chamar o banco de BDEM_UF_2015
-
-# Após a criação do banco, fazer commit “Script e dados BDEM_UF_2015”
+# Após a criação do banco, fazer commit "Script e dados BDEM_UF_2015"
 
 
 

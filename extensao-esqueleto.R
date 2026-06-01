@@ -904,7 +904,14 @@ write.csv(SIDRA_UF, "SIDRA_PI.csv", row.names = FALSE)
 #Tarefa 2: Acesso aos bancos de dados do SINISA e obtenção da informação
 # Escreva os comandos da Tarefa 2 estando na branch OUTROS# Leia o arquivo agua e esgoto - município - 2015.csv 
 library(tidyverse)
-agua_esgoto = read.csv2("agua e esgoto - município - 2015.csv")
+library(readr)
+
+
+agua_esgoto <- read_csv2(
+  "agua e esgoto - município - 2015.csv",
+  locale = locale(decimal_mark = ",", grouping_mark = ".")
+)
+
 
 # A partir do arquivo acima gere o banco de dados de nome SINISA_UF com as seguintes variáveis:
 # 1  ANO    
@@ -912,9 +919,9 @@ agua_esgoto = read.csv2("agua e esgoto - município - 2015.csv")
 # 3  CODMUNRES
 # 4 POPR_RA
 # 5 POPR_RE
-
+colnames(agua_esgoto)
 agua_esgoto = agua_esgoto %>% filter(substr(CODMUNRES, 1, 2) == "22")
-agua_esgoto = agua_esgoto %>% rename(ANO =  Ano.de.Referência,
+agua_esgoto = agua_esgoto %>% rename(ANO = `Ano de Referência`,
                                      POPRE_RA = POPR_RA,
                                      POPRE_RE= POPR_RE
 )
@@ -945,9 +952,9 @@ write.csv(SINISA_PI , file = "SINISA_PI.csv")
 # 2. IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv
 # 3. IDHM - 2010 - municípios - Atlas Brasil.csv
 
-codmun = read_csv2("códigos dos municípios - 2010.csv") 
-IDHM_tot_sex = read.csv2("IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv")
-IDHM_mun = read.csv2("IDHM - 2010 - municípios - Atlas Brasil.csv")
+codmun = read_csv2("códigos dos municípios - 2010.csv") %>% select(1,2) 
+IDHM_tot_sex = read.csv2("IDHM - 2010 (CENSO) e 2015 (PNAD) - total e por sexo - UF - Atlas Brasil.csv") %>% select(1:7)
+IDHM_mun = read.csv2("IDHM - 2010 - municípios - Atlas Brasil.csv") %>% select(1,2)
 
 # A partir do arquivo acima gere o banco de dados de nome ATLAS_UF com as seguintes variáveis:
 # 1  ANO    
